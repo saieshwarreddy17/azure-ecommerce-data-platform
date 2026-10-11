@@ -1,0 +1,28 @@
+{
+	"name": "TRG_Bronze_File_Arrival",
+	"properties": {
+		"annotations": [],
+		"runtimeState": "Started",
+		"pipelines": [
+			{
+				"pipelineReference": {
+					"referenceName": "PL_Master_Ecommerce",
+					"type": "PipelineReference"
+				},
+				"parameters": {
+					"p_blobPath": "@concat(triggerBody().folderPath,'/',triggerBody().fileName\n)"
+				}
+			}
+		],
+		"type": "BlobEventsTrigger",
+		"typeProperties": {
+			"blobPathBeginsWith": "/bronze/blobs/",
+			"blobPathEndsWith": ".parquet",
+			"ignoreEmptyBlobs": true,
+			"scope": "/subscriptions/c9e7ce32-b011-4262-82fc-4a108f410225/resourceGroups/RGEcommerceDE/providers/Microsoft.Storage/storageAccounts/stcommercesrc",
+			"events": [
+				"Microsoft.Storage.BlobCreated"
+			]
+		}
+	}
+}

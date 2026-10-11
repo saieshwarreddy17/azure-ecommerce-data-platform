@@ -1,0 +1,193 @@
+{
+	"name": "PL_MySQL_Customers_To_Bronze",
+	"properties": {
+		"activities": [
+			{
+				"name": "Customers_Copy_Data",
+				"type": "Copy",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "MySqlSource"
+					},
+					"sink": {
+						"type": "ParquetSink",
+						"storeSettings": {
+							"type": "AzureBlobFSWriteSettings",
+							"copyBehavior": "PreserveHierarchy"
+						},
+						"formatSettings": {
+							"type": "ParquetWriteSettings"
+						}
+					},
+					"enableStaging": false,
+					"translator": {
+						"type": "TabularTranslator",
+						"mappings": [
+							{
+								"source": {
+									"name": "customer_id",
+									"type": "Int32",
+									"physicalType": "Int32"
+								},
+								"sink": {
+									"name": "customer_id",
+									"type": "Int32",
+									"physicalType": "INT_32"
+								}
+							},
+							{
+								"source": {
+									"name": "first_name",
+									"type": "String",
+									"physicalType": "VarChar"
+								},
+								"sink": {
+									"name": "first_name",
+									"type": "String",
+									"physicalType": "UTF8"
+								}
+							},
+							{
+								"source": {
+									"name": "last_name",
+									"type": "String",
+									"physicalType": "VarChar"
+								},
+								"sink": {
+									"name": "last_name",
+									"type": "String",
+									"physicalType": "UTF8"
+								}
+							},
+							{
+								"source": {
+									"name": "email",
+									"type": "String",
+									"physicalType": "VarChar"
+								},
+								"sink": {
+									"name": "email",
+									"type": "String",
+									"physicalType": "UTF8"
+								}
+							},
+							{
+								"source": {
+									"name": "phone",
+									"type": "String",
+									"physicalType": "VarChar"
+								},
+								"sink": {
+									"name": "phone",
+									"type": "String",
+									"physicalType": "UTF8"
+								}
+							},
+							{
+								"source": {
+									"name": "gender",
+									"type": "String",
+									"physicalType": "VarChar"
+								},
+								"sink": {
+									"name": "gender",
+									"type": "String",
+									"physicalType": "UTF8"
+								}
+							},
+							{
+								"source": {
+									"name": "date_of_birth",
+									"type": "DateTime",
+									"physicalType": "Date"
+								},
+								"sink": {
+									"name": "date_of_birth",
+									"type": "DateTime",
+									"physicalType": "INT_96"
+								}
+							},
+							{
+								"source": {
+									"name": "registration_date",
+									"type": "DateTime",
+									"physicalType": "DateTime"
+								},
+								"sink": {
+									"name": "registration_date",
+									"type": "DateTime",
+									"physicalType": "INT_96"
+								}
+							},
+							{
+								"source": {
+									"name": "customer_status",
+									"type": "String",
+									"physicalType": "VarChar"
+								},
+								"sink": {
+									"name": "customer_status",
+									"type": "String",
+									"physicalType": "UTF8"
+								}
+							},
+							{
+								"source": {
+									"name": "created_at",
+									"type": "DateTime",
+									"physicalType": "DateTime"
+								},
+								"sink": {
+									"name": "created_at",
+									"type": "DateTime",
+									"physicalType": "INT_96"
+								}
+							},
+							{
+								"source": {
+									"name": "updated_at",
+									"type": "DateTime",
+									"physicalType": "DateTime"
+								},
+								"sink": {
+									"name": "updated_at",
+									"type": "DateTime",
+									"physicalType": "INT_96"
+								}
+							}
+						],
+						"typeConversion": true,
+						"typeConversionSettings": {
+							"allowDataTruncation": true,
+							"treatBooleanAsNumber": false
+						}
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "DS_MySQL_Customers",
+						"type": "DatasetReference"
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "DS_ADLS_Bronze_Customers",
+						"type": "DatasetReference"
+					}
+				]
+			}
+		],
+		"annotations": [],
+		"lastPublishTime": "2026-10-02T17:56:41Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

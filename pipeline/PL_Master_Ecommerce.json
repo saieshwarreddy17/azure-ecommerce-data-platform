@@ -1,0 +1,421 @@
+{
+	"name": "PL_Master_Ecommerce",
+	"properties": {
+		"activities": [
+			{
+				"name": "Set_Run_ID",
+				"type": "SetVariable",
+				"dependsOn": [],
+				"policy": {
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "run_id",
+					"value": {
+						"value": "@pipeline().RunId",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "Set_Event_Path",
+				"type": "SetVariable",
+				"dependsOn": [
+					{
+						"activity": "Set_Run_ID",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "event_blob_path",
+					"value": {
+						"value": "@pipeline().parameters.p_blobPath",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "Set_Table_Name",
+				"type": "SetVariable",
+				"dependsOn": [
+					{
+						"activity": "Set_Event_Path",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "table_name",
+					"value": {
+						"value": "@split(variables('event_blob_path'), '/')[1]",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "Switch_Table_Routing",
+				"type": "Switch",
+				"dependsOn": [
+					{
+						"activity": "NB_Audit_Start",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"on": {
+						"value": "@variables('table_name')",
+						"type": "Expression"
+					},
+					"cases": [
+						{
+							"value": "customers",
+							"activities": [
+								{
+									"name": "NB_Process_Customers",
+									"type": "DatabricksNotebook",
+									"dependsOn": [],
+									"policy": {
+										"timeout": "0.12:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"notebookPath": "/ecommerce/NB_Process_Customers",
+										"baseParameters": {
+											"event_blob_path": {
+												"value": "@variables('event_blob_path')",
+												"type": "Expression"
+											}
+										}
+									},
+									"linkedServiceName": {
+										"referenceName": "AzureDatabricks1",
+										"type": "LinkedServiceReference"
+									}
+								}
+							]
+						},
+						{
+							"value": "products",
+							"activities": [
+								{
+									"name": "NB_Process_Products",
+									"type": "DatabricksNotebook",
+									"dependsOn": [],
+									"policy": {
+										"timeout": "0.12:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"notebookPath": "/ecommerce/NB_Process_Products",
+										"baseParameters": {
+											"event_blob_path": {
+												"value": "@variables('event_blob_path')",
+												"type": "Expression"
+											}
+										}
+									},
+									"linkedServiceName": {
+										"referenceName": "AzureDatabricks1",
+										"type": "LinkedServiceReference"
+									}
+								}
+							]
+						},
+						{
+							"value": "Orders",
+							"activities": [
+								{
+									"name": "NB_Process_Orders",
+									"type": "DatabricksNotebook",
+									"dependsOn": [],
+									"policy": {
+										"timeout": "0.12:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"notebookPath": "/ecommerce/NB_Process_Orders",
+										"baseParameters": {
+											"event_blob_path": {
+												"value": "@variables('event_blob_path')",
+												"type": "Expression"
+											}
+										}
+									},
+									"linkedServiceName": {
+										"referenceName": "AzureDatabricks1",
+										"type": "LinkedServiceReference"
+									}
+								}
+							]
+						},
+						{
+							"value": "order_items",
+							"activities": [
+								{
+									"name": "NP_Process_Order_items",
+									"type": "DatabricksNotebook",
+									"dependsOn": [],
+									"policy": {
+										"timeout": "0.12:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"notebookPath": "/ecommerce/NB_Process_Order_Items",
+										"baseParameters": {
+											"event_blob_path": {
+												"value": "@variables('event_blob_path')",
+												"type": "Expression"
+											}
+										}
+									},
+									"linkedServiceName": {
+										"referenceName": "AzureDatabricks1",
+										"type": "LinkedServiceReference"
+									}
+								}
+							]
+						},
+						{
+							"value": "payments",
+							"activities": [
+								{
+									"name": "NB_Process_Payments",
+									"type": "DatabricksNotebook",
+									"dependsOn": [],
+									"policy": {
+										"timeout": "0.12:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"notebookPath": "/ecommerce/NB_Process_Payments",
+										"baseParameters": {
+											"event_blob_path": {
+												"value": "@variables('event_blob_path')",
+												"type": "Expression"
+											}
+										}
+									},
+									"linkedServiceName": {
+										"referenceName": "AzureDatabricks1",
+										"type": "LinkedServiceReference"
+									}
+								}
+							]
+						},
+						{
+							"value": "customer_addresses",
+							"activities": [
+								{
+									"name": "NP_Process_Customer_Address",
+									"type": "DatabricksNotebook",
+									"dependsOn": [],
+									"policy": {
+										"timeout": "0.12:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"notebookPath": "/ecommerce/NB_Process_Customer_Address",
+										"baseParameters": {
+											"event_blob_path": {
+												"value": "@variables('event_blob_path')",
+												"type": "Expression"
+											}
+										}
+									},
+									"linkedServiceName": {
+										"referenceName": "AzureDatabricks1",
+										"type": "LinkedServiceReference"
+									}
+								}
+							]
+						},
+						{
+							"value": "reviews",
+							"activities": [
+								{
+									"name": "NB_Process_Reviews",
+									"type": "DatabricksNotebook",
+									"dependsOn": [],
+									"policy": {
+										"timeout": "0.12:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"notebookPath": "/ecommerce/NB_Process_Reviews",
+										"baseParameters": {
+											"event_blob_path": {
+												"value": "@variables('event_blob_path')",
+												"type": "Expression"
+											}
+										}
+									},
+									"linkedServiceName": {
+										"referenceName": "AzureDatabricks1",
+										"type": "LinkedServiceReference"
+									}
+								}
+							]
+						}
+					]
+				}
+			},
+			{
+				"name": "NB_Audit_Start",
+				"type": "DatabricksNotebook",
+				"dependsOn": [
+					{
+						"activity": "Set_Table_Name",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"notebookPath": "/ecommerce/NB_Control_Audit",
+					"baseParameters": {
+						"pipeline_name": {
+							"value": "@pipeline().Pipeline",
+							"type": "Expression"
+						},
+						"table_name": {
+							"value": "@variables('table_name')",
+							"type": "Expression"
+						},
+						"run_id": {
+							"value": "@variables('run_id')",
+							"type": "Expression"
+						},
+						"event_blob_path": {
+							"value": "@variables('event_blob_path')",
+							"type": "Expression"
+						},
+						"trigger_type": {
+							"value": "@pipeline().TriggerType",
+							"type": "Expression"
+						}
+					}
+				},
+				"linkedServiceName": {
+					"referenceName": "AzureDatabricks1",
+					"type": "LinkedServiceReference"
+				}
+			},
+			{
+				"name": "NB_Audit_End",
+				"type": "DatabricksNotebook",
+				"dependsOn": [
+					{
+						"activity": "Switch_Table_Routing",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"notebookPath": "/ecommerce/NB_Control_Audit_End",
+					"baseParameters": {
+						"pipeline_name": {
+							"value": "@pipeline().Pipeline",
+							"type": "Expression"
+						},
+						"table_name": {
+							"value": "@variables('table_name')",
+							"type": "Expression"
+						},
+						"run_id": {
+							"value": "@variables('run_id')",
+							"type": "Expression"
+						},
+						"rows_read": "0",
+						"rows_written": "0"
+					}
+				},
+				"linkedServiceName": {
+					"referenceName": "AzureDatabricks1",
+					"type": "LinkedServiceReference"
+				}
+			}
+		],
+		"parameters": {
+			"p_blobPath": {
+				"type": "string"
+			}
+		},
+		"variables": {
+			"run_id": {
+				"type": "String"
+			},
+			"event_blob_path": {
+				"type": "String"
+			},
+			"table_name": {
+				"type": "String"
+			}
+		},
+		"annotations": [],
+		"lastPublishTime": "2026-10-10T09:51:06Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

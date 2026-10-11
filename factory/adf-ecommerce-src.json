@@ -1,0 +1,15 @@
+{
+	"name": "adf-ecommerce-src",
+	"properties": {
+		"trustModeClaimForMi": {
+			"value": "Disabled",
+			"editable": true
+		}
+	},
+	"location": "centralus",
+	"identity": {
+		"type": "SystemAssigned",
+		"principalId": "49991034-fb9f-43b5-a096-9dbd96004859",
+		"tenantId": "6c09382a-e76b-490d-8d99-25bbb44d542c"
+	}
+}

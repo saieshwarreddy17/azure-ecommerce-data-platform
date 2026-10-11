@@ -1,0 +1,194 @@
+{
+	"name": "PL_MySQL_Payments_Incremental",
+	"properties": {
+		"activities": [
+			{
+				"name": "Lookup_Previous_Watermark",
+				"type": "Lookup",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "JsonSource",
+						"storeSettings": {
+							"type": "AzureBlobFSReadSettings",
+							"recursive": true,
+							"enablePartitionDiscovery": false
+						},
+						"formatSettings": {
+							"type": "JsonReadSettings"
+						}
+					},
+					"dataset": {
+						"referenceName": "DS_ADLS_Control_Payments_Watermark",
+						"type": "DatasetReference"
+					}
+				}
+			},
+			{
+				"name": "Lookup_Latest_Watermark",
+				"type": "Lookup",
+				"dependsOn": [
+					{
+						"activity": "Lookup_Previous_Watermark",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "MySqlSource",
+						"query": "SELECT MAX(updated_at) AS latest_watermark\nFROM payments"
+					},
+					"dataset": {
+						"referenceName": "DS_MySQL_Payments",
+						"type": "DatasetReference"
+					}
+				}
+			},
+			{
+				"name": "If_New_Payments",
+				"type": "IfCondition",
+				"dependsOn": [
+					{
+						"activity": "Lookup_Latest_Watermark",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"expression": {
+						"value": "@greater(activity('Lookup_Latest_Watermark').output.firstRow.latest_watermark,activity('Lookup_Previous_Watermark').output.firstRow.previous_watermark )",
+						"type": "Expression"
+					},
+					"ifTrueActivities": [
+						{
+							"name": "Copy_Payments_Incremental",
+							"type": "Copy",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"source": {
+									"type": "MySqlSource",
+									"query": {
+										"value": "@concat('SELECT * FROM payments WHERE updated_at > ''',\n    activity('Lookup_Previous_Watermark').output.firstRow.previous_watermark,''' AND updated_At <= ''',\n    activity('Lookup_Latest_Watermark').output.firstRow.latest_watermark,'''')",
+										"type": "Expression"
+									}
+								},
+								"sink": {
+									"type": "ParquetSink",
+									"storeSettings": {
+										"type": "AzureBlobFSWriteSettings"
+									},
+									"formatSettings": {
+										"type": "ParquetWriteSettings"
+									}
+								},
+								"enableStaging": false,
+								"translator": {
+									"type": "TabularTranslator",
+									"typeConversion": true,
+									"typeConversionSettings": {
+										"allowDataTruncation": true,
+										"treatBooleanAsNumber": false
+									}
+								}
+							},
+							"inputs": [
+								{
+									"referenceName": "DS_MySQL_Payments",
+									"type": "DatasetReference"
+								}
+							],
+							"outputs": [
+								{
+									"referenceName": "DS_ADLS_Bronze_Payments",
+									"type": "DatasetReference"
+								}
+							]
+						},
+						{
+							"name": "Update_Payments_Watermark",
+							"type": "Copy",
+							"dependsOn": [
+								{
+									"activity": "Copy_Payments_Incremental",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"source": {
+									"type": "MySqlSource",
+									"query": {
+										"value": "@concat('SELECT''',\nactivity('Lookup_Latest_Watermark').output.firstRow.latest_watermark,'''AS previous_watermark')",
+										"type": "Expression"
+									}
+								},
+								"sink": {
+									"type": "JsonSink",
+									"storeSettings": {
+										"type": "AzureBlobFSWriteSettings"
+									},
+									"formatSettings": {
+										"type": "JsonWriteSettings"
+									}
+								},
+								"enableStaging": false
+							},
+							"inputs": [
+								{
+									"referenceName": "DS_MySQL_Payments",
+									"type": "DatasetReference"
+								}
+							],
+							"outputs": [
+								{
+									"referenceName": "DS_ADLS_Control_Payments_Watermark",
+									"type": "DatasetReference"
+								}
+							]
+						}
+					]
+				}
+			}
+		],
+		"annotations": [],
+		"lastPublishTime": "2026-10-02T18:23:22Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

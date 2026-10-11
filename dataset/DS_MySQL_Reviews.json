@@ -1,0 +1,16 @@
+{
+	"name": "DS_MySQL_Reviews",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "LS_MySQL_Ecommerce",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "MySqlTable",
+		"schema": [],
+		"typeProperties": {
+			"tableName": "`reviews`"
+		}
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

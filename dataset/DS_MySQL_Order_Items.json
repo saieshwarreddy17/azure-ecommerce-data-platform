@@ -1,0 +1,16 @@
+{
+	"name": "DS_MySQL_Order_Items",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "LS_MySQL_Ecommerce",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "MySqlTable",
+		"schema": [],
+		"typeProperties": {
+			"tableName": "`order_items`"
+		}
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

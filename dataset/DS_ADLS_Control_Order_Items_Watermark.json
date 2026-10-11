@@ -1,0 +1,21 @@
+{
+	"name": "DS_ADLS_Control_Order_Items_Watermark",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "LS_ADLS_Ecommerce",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "Json",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobFSLocation",
+				"fileName": "order_items_watermark.json",
+				"folderPath": "control",
+				"fileSystem": "bronze"
+			}
+		},
+		"schema": {}
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

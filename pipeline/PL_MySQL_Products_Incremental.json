@@ -1,0 +1,287 @@
+{
+	"name": "PL_MySQL_Products_Incremental",
+	"properties": {
+		"activities": [
+			{
+				"name": "Lookup_Previous_Watermark",
+				"type": "Lookup",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "JsonSource",
+						"storeSettings": {
+							"type": "AzureBlobFSReadSettings",
+							"recursive": true,
+							"enablePartitionDiscovery": false
+						},
+						"formatSettings": {
+							"type": "JsonReadSettings"
+						}
+					},
+					"dataset": {
+						"referenceName": "DS_ADLS_Control_Products_Watermark",
+						"type": "DatasetReference"
+					}
+				}
+			},
+			{
+				"name": "Lookup_Latest_Watermark",
+				"type": "Lookup",
+				"dependsOn": [
+					{
+						"activity": "Lookup_Previous_Watermark",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "MySqlSource",
+						"query": {
+							"value": "SELECT MAX(updated_at) AS latest_watermark\nFROM products",
+							"type": "Expression"
+						}
+					},
+					"dataset": {
+						"referenceName": "DS_MySQL_Products",
+						"type": "DatasetReference"
+					}
+				}
+			},
+			{
+				"name": "If_New_Products",
+				"type": "IfCondition",
+				"dependsOn": [
+					{
+						"activity": "Lookup_Latest_Watermark",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"expression": {
+						"value": "@greater(\n    activity('Lookup_Latest_Watermark').output.firstRow.latest_watermark,\n    activity('Lookup_Previous_Watermark').output.firstRow.previous_watermark\n)",
+						"type": "Expression"
+					},
+					"ifTrueActivities": [
+						{
+							"name": "Copy_Products_Incremental",
+							"type": "Copy",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"source": {
+									"type": "MySqlSource",
+									"query": {
+										"value": "@concat(\n'SELECT * FROM products WHERE updated_at > ''',\nactivity('Lookup_Previous_Watermark').output.firstRow.previous_watermark,\n''' AND updated_at <= ''',\nactivity('Lookup_Latest_Watermark').output.firstRow.latest_watermark,\n''''\n)",
+										"type": "Expression"
+									}
+								},
+								"sink": {
+									"type": "ParquetSink",
+									"storeSettings": {
+										"type": "AzureBlobFSWriteSettings"
+									},
+									"formatSettings": {
+										"type": "ParquetWriteSettings"
+									}
+								},
+								"enableStaging": false,
+								"translator": {
+									"type": "TabularTranslator",
+									"mappings": [
+										{
+											"source": {
+												"name": "product_id"
+											},
+											"sink": {
+												"name": "product_id"
+											}
+										},
+										{
+											"source": {
+												"name": "product_name"
+											},
+											"sink": {
+												"name": "product_name"
+											}
+										},
+										{
+											"source": {
+												"name": "category_id"
+											},
+											"sink": {
+												"name": "category_id"
+											}
+										},
+										{
+											"source": {
+												"name": "category_name"
+											},
+											"sink": {
+												"name": "category_name"
+											}
+										},
+										{
+											"source": {
+												"name": "brand"
+											},
+											"sink": {
+												"name": "brand"
+											}
+										},
+										{
+											"source": {
+												"name": "price"
+											},
+											"sink": {
+												"name": "price"
+											}
+										},
+										{
+											"source": {
+												"name": "cost"
+											},
+											"sink": {
+												"name": "cost"
+											}
+										},
+										{
+											"source": {
+												"name": "stock_quantity"
+											},
+											"sink": {
+												"name": "stock_quantity"
+											}
+										},
+										{
+											"source": {
+												"name": "product_status"
+											},
+											"sink": {
+												"name": "product_status"
+											}
+										},
+										{
+											"source": {
+												"name": "created_at"
+											},
+											"sink": {
+												"name": "created_at"
+											}
+										},
+										{
+											"source": {
+												"name": "updated_at"
+											},
+											"sink": {
+												"name": "updated_at"
+											}
+										}
+									],
+									"typeConversion": true,
+									"typeConversionSettings": {
+										"allowDataTruncation": true,
+										"treatBooleanAsNumber": false
+									}
+								}
+							},
+							"inputs": [
+								{
+									"referenceName": "DS_MySQL_Products",
+									"type": "DatasetReference"
+								}
+							],
+							"outputs": [
+								{
+									"referenceName": "DS_ADLS_Bronze_Products",
+									"type": "DatasetReference"
+								}
+							]
+						},
+						{
+							"name": "Update_Products_Watermark",
+							"type": "Copy",
+							"dependsOn": [
+								{
+									"activity": "Copy_Products_Incremental",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"source": {
+									"type": "MySqlSource",
+									"query": {
+										"value": "@concat('SELECT ''',\nactivity('Lookup_Latest_Watermark').output.firstRow.latest_watermark,\n''' AS previous_watermark')",
+										"type": "Expression"
+									}
+								},
+								"sink": {
+									"type": "JsonSink",
+									"storeSettings": {
+										"type": "AzureBlobFSWriteSettings"
+									},
+									"formatSettings": {
+										"type": "JsonWriteSettings"
+									}
+								},
+								"enableStaging": false
+							},
+							"inputs": [
+								{
+									"referenceName": "DS_MySQL_Products",
+									"type": "DatasetReference"
+								}
+							],
+							"outputs": [
+								{
+									"referenceName": "DS_ADLS_Control_Products_Watermark",
+									"type": "DatasetReference"
+								}
+							]
+						}
+					]
+				}
+			}
+		],
+		"annotations": [],
+		"lastPublishTime": "2026-10-02T17:56:41Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

@@ -1,0 +1,21 @@
+{
+	"name": "DS_ADLS_Bronze_Reviews",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "LS_ADLS_Ecommerce",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "Parquet",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobFSLocation",
+				"folderPath": "reviews",
+				"fileSystem": "bronze"
+			},
+			"compressionCodec": "snappy"
+		},
+		"schema": []
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

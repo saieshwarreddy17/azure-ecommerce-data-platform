@@ -1,0 +1,21 @@
+{
+	"name": "DS_ADLS_Bronze_Products",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "LS_ADLS_Ecommerce",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "Parquet",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobFSLocation",
+				"folderPath": "products",
+				"fileSystem": "bronze"
+			},
+			"compressionCodec": "snappy"
+		},
+		"schema": []
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

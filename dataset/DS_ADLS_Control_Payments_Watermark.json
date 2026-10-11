@@ -1,0 +1,21 @@
+{
+	"name": "DS_ADLS_Control_Payments_Watermark",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "LS_ADLS_Ecommerce",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "Json",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobFSLocation",
+				"fileName": "payments_watermark.json",
+				"folderPath": "control",
+				"fileSystem": "bronze"
+			}
+		},
+		"schema": {}
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

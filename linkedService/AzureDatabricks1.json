@@ -1,0 +1,14 @@
+{
+	"name": "AzureDatabricks1",
+	"type": "Microsoft.DataFactory/factories/linkedservices",
+	"properties": {
+		"annotations": [],
+		"type": "AzureDatabricks",
+		"typeProperties": {
+			"domain": "https://adb-7405612583850744.4.azuredatabricks.net",
+			"authentication": "MSI",
+			"workspaceResourceId": "/subscriptions/c9e7ce32-b011-4262-82fc-4a108f410225/resourceGroups/RGEcommerceDE/providers/Microsoft.Databricks/workspaces/dbw-ecommerce-de",
+			"existingClusterId": "1003-052435-xepp1xgc"
+		}
+	}
+}
