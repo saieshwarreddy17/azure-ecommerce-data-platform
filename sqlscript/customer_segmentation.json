@@ -1,0 +1,17 @@
+{
+	"name": "customer_segmentation",
+	"properties": {
+		"content": {
+			"query": "CREATE EXTERNAL TABLE dbo.customer_segmentation\n(\n    customer_id INT,\n    first_name VARCHAR(100),\n    last_name VARCHAR(100),\n    email VARCHAR(255),\n    gender VARCHAR(50),\n    customer_status VARCHAR(50),\n    total_orders BIGINT,\n    total_spend DECIMAL(23,2),\n    average_order_value DECIMAL(13,2),\n    last_order_date DATETIME2,\n    recency_days INT,\n    recency_score INT,\n    frequency_score INT,\n    monetary_score INT,\n    customer_segment VARCHAR(100),\n    segmentation_timestamp DATETIME2\n)\nWITH\n(\n    LOCATION = 'synapse_serving/customer_segmentation/',\n    DATA_SOURCE = EcommerceGold,\n    FILE_FORMAT = ParquetFormat\n);\n\n\nSELECT TOP 10 * FROM dbo.customer_segmentation;\n\nSELECT COUNT_BIG(*) AS total_rows\nFROM dbo.customer_segmentation;",
+			"metadata": {
+				"language": "sql"
+			},
+			"currentConnection": {
+				"databaseName": "EcommerceWarehouse",
+				"poolName": "Built-in"
+			},
+			"resultLimit": 5000
+		},
+		"type": "SqlQuery"
+	}
+}

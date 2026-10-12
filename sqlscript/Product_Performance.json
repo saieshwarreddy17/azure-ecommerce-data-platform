@@ -1,0 +1,17 @@
+{
+	"name": "Product_Performance",
+	"properties": {
+		"content": {
+			"query": "CREATE EXTERNAL TABLE dbo.product_performance\n(\n    product_id INT ,\n    product_name VARCHAR(100) ,\n    category_name VARCHAR(100) ,\n    brand VARCHAR(100) ,\n    total_orders BIGINT ,\n    total_units_sold BIGINT ,\n    gross_sales DECIMAL(34,2) ,\n    total_discount DECIMAL(23,2),\n    total_tax DECIMAL(23,2),\n    net_sales DECIMAL(36,2) ,\n    average_selling_price DECIMAL(34,2)\n)\nWITH\n(\n    LOCATION = 'synapse_serving/product_performance/',\n    DATA_SOURCE = EcommerceGold,\n    FILE_FORMAT = ParquetFormat\n)\n\n\nSELECT TOP 10 * FROM dbo.product_performance",
+			"metadata": {
+				"language": "sql"
+			},
+			"currentConnection": {
+				"databaseName": "EcommerceWarehouse",
+				"poolName": "Built-in"
+			},
+			"resultLimit": 5000
+		},
+		"type": "SqlQuery"
+	}
+}

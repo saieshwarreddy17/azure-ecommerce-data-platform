@@ -1,0 +1,17 @@
+{
+	"name": "Dimensions",
+	"properties": {
+		"content": {
+			"query": "CREATE EXTERNAL TABLE dbo.dim_customer\n(\n    customer_key BIGINT,\n    customer_id INT,\n    first_name VARCHAR(100),\n    last_name VARCHAR(100),\n    full_name VARCHAR(201),\n    email VARCHAR(255),\n    phone VARCHAR(50),\n    gender VARCHAR(30),\n    date_of_birth DATETIME2,\n    registration_date DATETIME2,\n    customer_status VARCHAR(50),\n    created_at DATETIME2,\n    updated_at DATETIME2\n)\nWITH\n(\n    LOCATION = 'dimensional_model/dim_customer/',\n    DATA_SOURCE = EcommerceGold,\n    FILE_FORMAT = ParquetFormat\n);\n\n\nSELECT TOP 10 *\nFROM dbo.dim_customer;\n\n\n\n--  Dim Product\n\nCREATE EXTERNAL TABLE dbo.dim_product\n(\n    product_key INT,\n    product_id INT,\n    product_name VARCHAR(255),\n    category_id INT,\n    category_name VARCHAR(100),\n    brand VARCHAR(100),\n    price DECIMAL(12,2),\n    cost DECIMAL(12,2),\n    stock_quantity INT,\n    product_status VARCHAR(50),\n    created_at DATETIME2,\n    updated_at DATETIME2\n)\nWITH\n(\n    LOCATION = 'dimensional_model/dim_product/',\n    DATA_SOURCE = EcommerceGold,\n    FILE_FORMAT = ParquetFormat\n);\n\n\n\nSELECT\n    COUNT(*) AS total_rows,\n    SUM(CASE WHEN product_key = 0 THEN 1 ELSE 0 END) AS unknown_product_rows\nFROM dbo.dim_product;\n\n\n-- Dim Date\n\nCREATE EXTERNAL TABLE dbo.dim_date\n(\n    date_key INT,\n    calendar_date DATE,\n    year INT,\n    quarter INT,\n    month_number INT,\n    month_name VARCHAR(20),\n    year_month VARCHAR(7),\n    day_of_month INT,\n    day_of_week INT,\n    day_name VARCHAR(20),\n    is_weekend BIT\n)\nWITH\n(\n    LOCATION = 'dimensional_model/dim_date/',\n    DATA_SOURCE = EcommerceGold,\n    FILE_FORMAT = ParquetFormat\n);\n\nSELECT\n    COUNT(*) AS total_dates,\n    MIN(calendar_date) AS first_date,\n    MAX(calendar_date) AS last_date,\n    COUNT(DISTINCT date_key) AS distinct_date_keys\nFROM dbo.dim_date;\n\n\n\n-- Dim Address\n\nCREATE EXTERNAL TABLE dbo.dim_address\n(\n    address_key INT,\n    address_id INT,\n    customer_id INT,\n    address_type VARCHAR(50),\n    address_line1 VARCHAR(255),\n    address_line2 VARCHAR(255),\n    city VARCHAR(100),\n    state VARCHAR(100),\n    postal_code VARCHAR(30),\n    country VARCHAR(100),\n    is_default BIT,\n    is_effective_default BIT,\n    created_at DATETIME2,\n    updated_at DATETIME2\n)\nWITH\n(\n    LOCATION = 'dimensional_model/dim_address/',\n    DATA_SOURCE = EcommerceGold,\n    FILE_FORMAT = ParquetFormat\n);\n\n\nSELECT\n    COUNT(*) AS total_rows,\n    COUNT(DISTINCT address_id) AS distinct_addresses,\n    SUM(CASE WHEN address_id IS NULL THEN 1 ELSE 0 END)\n        AS null_address_ids\nFROM dbo.dim_address;",
+			"metadata": {
+				"language": "sql"
+			},
+			"currentConnection": {
+				"databaseName": "EcommerceWarehouse",
+				"poolName": "Built-in"
+			},
+			"resultLimit": 5000
+		},
+		"type": "SqlQuery"
+	}
+}

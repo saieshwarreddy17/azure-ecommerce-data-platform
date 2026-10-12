@@ -1,0 +1,17 @@
+{
+	"name": "Daily_sales",
+	"properties": {
+		"content": {
+			"query": "CREATE EXTERNAL TABLE dbo.daily_sales\n(\n    sales_date DATE,\n    total_orders BIGINT,\n    total_items BIGINT,\n    gross_sales DECIMAL(23,2),\n    total_discount DECIMAL(23,2),\n    total_tax DECIMAL(23,2),\n    net_sales DECIMAL(23,2),\n    average_order_value DECIMAL(13,2)\n)\nWITH\n(\n    LOCATION = 'synapse_serving/daily_sales/',\n    DATA_SOURCE = EcommerceGold,\n    FILE_FORMAT = ParquetFormat\n);\n\n\nSELECT TOP 10 *\nFROM dbo.daily_sales;",
+			"metadata": {
+				"language": "sql"
+			},
+			"currentConnection": {
+				"databaseName": "EcommerceWarehouse",
+				"poolName": "Built-in"
+			},
+			"resultLimit": 5000
+		},
+		"type": "SqlQuery"
+	}
+}

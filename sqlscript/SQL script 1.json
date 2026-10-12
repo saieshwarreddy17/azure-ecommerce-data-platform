@@ -1,0 +1,17 @@
+{
+	"name": "SQL script 1",
+	"properties": {
+		"content": {
+			"query": "IF DB_ID('EcommerceWarehouse') IS NULL\nBEGIN\n    CREATE DATABASE EcommerceWarehouse;\nEND;\n\nUSE EcommerceWarehouse\n\nCREATE EXTERNAL DATA SOURCE EcommerceGold\nWITH\n(\n    LOCATION = 'https://stcommercesrc.dfs.core.windows.net/gold'\n);\n\n\nCREATE EXTERNAL FILE FORMAT ParquetFormat\nWITH\n(\n    FORMAT_TYPE = PARQUET\n);\n\nSELECT DB_NAME() AS current_database;\n\nSELECT\n    DB_NAME() AS current_database,\n    name,\n    location\nFROM sys.external_data_sources\nWHERE name = 'EcommerceGold';\n\n\nSELECT name\nFROM sys.databases\nWHERE name = 'EcommerceWarehouse';\n\n\n\n\n\nSELECT 'customer_360' AS table_name,\n       COUNT_BIG(*) AS total_rows\nFROM dbo.customer_360\n\nUNION ALL\n\nSELECT 'customer_segmentation',\n       COUNT_BIG(*)\nFROM dbo.customer_segmentation\n\nUNION ALL\n\nSELECT 'daily_sales',\n       COUNT_BIG(*)\nFROM dbo.daily_sales\n\nUNION ALL\n\nSELECT 'product_performance',\n       COUNT_BIG(*)\nFROM dbo.product_performance\n\nUNION ALL\n\nSELECT 'regional_sales',\n       COUNT_BIG(*)\nFROM dbo.regional_sales;\n",
+			"metadata": {
+				"language": "sql"
+			},
+			"currentConnection": {
+				"databaseName": "EcommerceWarehouse",
+				"poolName": "Built-in"
+			},
+			"resultLimit": 5000
+		},
+		"type": "SqlQuery"
+	}
+}

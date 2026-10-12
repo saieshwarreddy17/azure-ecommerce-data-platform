@@ -1,0 +1,17 @@
+{
+	"name": "Customer_360",
+	"properties": {
+		"content": {
+			"query": "CREATE EXTERNAL TABLE dbo.customer_360\n(\n    customer_id INT,\n    first_name VARCHAR(100),\n    last_name VARCHAR(100),\n    email VARCHAR(255),\n    gender VARCHAR(50),\n    customer_status VARCHAR(50),\n    city VARCHAR(100),\n    state VARCHAR(100),\n    country VARCHAR(100),\n    total_orders BIGINT,\n    total_items BIGINT,\n    total_spend DECIMAL(23,2),\n    average_order_value DECIMAL(13,2),\n    successful_payments BIGINT,\n    total_paid_amount DECIMAL(23,2),\n    total_reviews BIGINT,\n    average_rating FLOAT\n)\nWITH\n(\n    LOCATION = 'synapse_serving/customer_360/',\n    DATA_SOURCE = EcommerceGold,\n    FILE_FORMAT = ParquetFormat\n);\n\n\n\nSELECT TOP 10 *\nFROM dbo.customer_360;\n\n\n\nSELECT\n    name,\n    location,\n    data_source_id,\n    file_format_id\nFROM sys.external_tables\nWHERE name = 'customer_360';\n\nSELECT COUNT_BIG(*) AS total_customers\nFROM dbo.customer_360;",
+			"metadata": {
+				"language": "sql"
+			},
+			"currentConnection": {
+				"databaseName": "EcommerceWarehouse",
+				"poolName": "Built-in"
+			},
+			"resultLimit": 5000
+		},
+		"type": "SqlQuery"
+	}
+}
